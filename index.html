@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RelaxFlow: Text-Driven Amodal 3D Generation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css">
+    <style>
+        :root {
+            --primary-color: #1a202c; /* Deep slate */
+            --accent-color: #3182ce; /* Crisp blue */
+            --bg-color: #f7fafc; /* Off-white background */
+            --text-color: #4a5568; /* Soft dark grey for readable text */
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #e2e8f0;
+            --code-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .authors {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .authors sup,
+        .affiliations sup {
+            font-size: 0.7em;
+            vertical-align: super;
+            line-height: 0;
+            margin-left: 1px;
+        }
+
+        .affiliations {
+            font-size: 1.1rem;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .link-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 9999px; /* Pill shape */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-btn i {
+            font-size: 1.05rem;
+            line-height: 1;
+        }
+
+        .link-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        section {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            color: var(--accent-color);
+            font-size: 1.4rem;
+            margin-top: 40px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        .figure-container {
+            text-align: center;
+            margin: 40px 0;
+            padding: 24px;
+            background-color: #ffffff;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            background-color: #ffffff;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .caption {
+            font-size: 0.95rem;
+            color: #718096;
+            margin-top: 18px;
+            line-height: 1.5;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+        }
+
+        .citation-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid var(--border-color);
+        }
+
+        .citation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .citation-header p {
+            margin: 0;
+        }
+
+        .copy-btn {
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 9999px;
+            padding: 10px 18px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        .bibtex-block {
+            margin: 0;
+            padding: 24px;
+            border-radius: 14px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            border: 1px solid #1e293b;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .bibtex-block code {
+            font-family: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            display: block;
+        }
+
+        .copy-hint {
+            margin-top: 14px;
+            font-size: 0.92rem;
+            color: var(--code-muted);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            section { padding: 30px 20px; }
+            .citation-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>RelaxFlow: Text-Driven Amodal 3D Generation</h1>
+        <div class="authors">
+            Jiayin Zhu<sup>1</sup>, Guoji Fu<sup>1</sup>, Xiaolu Liu<sup>2,1</sup>, Qiyuan He<sup>1</sup>, Yicong Li<sup>1</sup>, Angela Yao<sup>1</sup>
+        </div>
+        <div class="affiliations">
+            <sup>1</sup>National University of Singapore, <sup>2</sup>Zhejiang University
+        </div>
+        <div class="links">
+            <a href="https://arxiv.org/abs/2603.05425" class="link-btn" target="_blank" rel="noopener noreferrer">
+                <i class="ai ai-arxiv" aria-hidden="true"></i>
+                <span>ArXiv</span>
+            </a>
+            <a href="https://github.com/viridityzhu/RelaxFlow" class="link-btn" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
+                <span>Code</span>
+            </a>
+        </div>
+    </header>
+
+    <section id="what-we-do">
+        <h2>🎯 What We Do: Resolving Semantic Ambiguity</h2>
+        
+        <div class="figure-container">
+            <img src="assets/teaser.png" alt="Multiple plausible amodal 3D interpretations under occlusion">
+            <div class="caption">Figure 1: The case for multiple plausible amodal 3D interpretations under occlusion.</div>
+        </div>
+
+        <p>Image-to-3D generation faces inherent semantic ambiguity under occlusion, where partial observation alone is often insufficient to determine the object category. For instance, a visible wooden backboard could plausibly correspond to a sofa, a bed, or a dressing table. Existing feedforward models, like SAM3D, often collapse to an "observation-overfitted" shape by uncontrolled hallucination.</p>
+        
+        <p>We formalize <strong>text-driven amodal 3D generation</strong>. Our task allows users to explicitly steer the completion of unseen regions using text prompts, while strictly preserving the visual evidence of the input observation.</p>
+    </section>
+
+    <section id="how-we-do-it">
+        <h2>⚙️ How We Do It: Decoupled Control & Relaxation</h2>
+
+        <p>These dual objectives demand distinct control granularities: rigid control for the visible observation versus relaxed structural control for the text prompt. To solve this, we propose <strong>RelaxFlow</strong>, a training-free dual-branch framework:</p>
+
+        <ul>
+            <li><strong>Observation Branch:</strong> Provides strict adherence to ensure visual fidelity for the observed pixels.</li>
+            <li><strong>Multi-Prior Consensus:</strong> Converts the text prompt into visual proxy reference images. Cross-attention across these priors naturally amplifies structural consensus while suppressing inconsistent, instance-specific textures.</li>
+            <li><strong>Visibility-Aware Fusion:</strong> A spatial blending mechanism ensuring the semantic guide only steers genuinely occluded regions, while the observation strictly governs the visible pixels.</li>
+        </ul>
+
+        <div class="figure-container">
+            <img src="assets/fig-pipeline.png" alt="RelaxFlow pipeline overview">
+            <div class="caption">Figure 2: RelaxFlow pipeline overview, featuring the Observation Branch and Semantic-Prior Branch.</div>
+        </div>
+
+        <h3>The Theory: Low-Pass Relaxation</h3>
+        
+        <div class="figure-container">
+            <img src="assets/fig-corridor-demon.png" alt="Conceptual illustration of low-pass relaxation">
+            <div class="caption">Figure 3: Conceptual illustration of low-pass relaxation widening the semantic corridor.</div>
+        </div>
+
+        <p>A core challenge is preventing the text prompt's high-frequency details from clashing with the input image. We introduce a Relaxation Mechanism that smooths cross-attention logits within the generation backbone.</p>
+        
+        <p>Theoretically, we prove this smoothing is equivalent to applying a low-pass filter on the generative vector field. This mathematically suppresses high-frequency instance details and exposes a coarse semantic corridor, enforcing only the low-frequency global geometry needed to accommodate the observation.</p>
+    </section>
+
+    <section id="benchmarks-results">
+        <h2>📊 Benchmarks & Results</h2>
+
+        <p>To facilitate systematic evaluation, we introduce two new diagnostic benchmarks:</p>
+        <ul>
+            <li><strong>ExtremeOcc-3D:</strong> Targets extreme occlusion in natural indoor scenes where visible evidence cannot identify the object category.</li>
+            <li><strong>AmbiSem-3D:</strong> Targets semantic branching, where the same visual evidence admits multiple plausible interpretations, paired with distinct text prompts.</li>
+        </ul>
+
+        <div class="figure-container">
+            <img src="assets/fig-qual.png" alt="Qualitative Comparisons on AmbiSem-3D and ExtremeOcc-3D">
+            <div class="caption">Figure 4: Qualitative comparisons showcasing observation fidelity and prompt-controlled completion.</div>
+        </div>
+
+        <p>Extensive experiments demonstrate that RelaxFlow successfully steers the generation of unseen regions to match the prompt intent. It avoids the observation-overfitted collapse of existing models and produces high-quality 3D assets without compromising visual fidelity.</p>
+    </section>
+
+    <section id="citation" class="citation-card">
+        <div class="citation-header">
+            <p>If you find RelaxFlow useful in your research, please consider citing it:</p>
+            <button type="button" class="copy-btn" id="copy-citation-btn">Copy</button>
+        </div>
+        <pre class="bibtex-block"><code id="bibtex-content">@article{zhu2026relaxflow,
+  title={RelaxFlow: Text-Driven Amodal 3D Generation},
+  author={Zhu, Jiayin and Fu, Guoji and Liu, Xiaolu and He, Qiyuan and Li, Yicong and Yao, Angela},
+  journal={arXiv preprint arXiv:2603.05425},
+  year={2026}
+}</code></pre>
+        <p class="copy-hint" id="copy-feedback"></p>
+    </section>
+</div>
+
+<script>
+    const copyButton = document.getElementById('copy-citation-btn');
+    const bibtexContent = document.getElementById('bibtex-content');
+    const copyFeedback = document.getElementById('copy-feedback');
+
+    if (copyButton && bibtexContent && copyFeedback) {
+        copyButton.addEventListener('click', async () => {
+            const citationText = bibtexContent.textContent;
+
+            try {
+                await navigator.clipboard.writeText(citationText);
+                copyButton.textContent = 'Copied';
+                copyButton.classList.add('copied');
+                copyFeedback.textContent = 'BibTeX copied to clipboard.';
+            } catch (error) {
+                copyButton.textContent = 'Unavailable';
+                copyFeedback.textContent = '';
+            }
+
+            window.clearTimeout(copyButton._resetTimer);
+            copyButton._resetTimer = window.setTimeout(() => {
+                copyButton.textContent = 'Copy';
+                copyButton.classList.remove('copied');
+                copyFeedback.textContent = '';
+            }, 2200);
+        });
+    }
+</script>
+
+</body>
+</html>
