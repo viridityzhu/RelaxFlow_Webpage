@@ -172,6 +172,18 @@
             color: var(--ink);
         }
 
+        .authors a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(31, 43, 39, 0.18);
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .authors a:hover {
+            color: var(--accent);
+            border-color: rgba(47, 111, 98, 0.4);
+        }
+
         .authors sup,
         .affiliations sup {
             font-size: 0.72em;
@@ -788,7 +800,12 @@
                         RelaxFlow is built around a simple claim: under heavy occlusion, single-view 3D generation is not merely incomplete, it is semantically underdetermined. What the model sees should be preserved rigidly; what language contributes should remain structural, relaxed, and focused on the unseen region.
                     </p>
                     <div class="authors">
-                        Jiayin Zhu<sup>1</sup>, Guoji Fu<sup>1</sup>, Xiaolu Liu<sup>2,1</sup>, Qiyuan He<sup>1</sup>, Yicong Li<sup>1</sup>, Angela Yao<sup>1</sup>
+                        <a href="https://jyzhu.top/" target="_blank" rel="noopener noreferrer">Jiayin Zhu</a><sup>1</sup>,
+                        <a href="https://scholar.google.com/citations?user=a8CLpC0AAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Guoji Fu</a><sup>1</sup>,
+                        <a href="https://github.com/xiaolul2" target="_blank" rel="noopener noreferrer">Xiaolu Liu</a><sup>2,1</sup>,
+                        <a href="https://qy-h00.github.io/" target="_blank" rel="noopener noreferrer">Qiyuan He</a><sup>1</sup>,
+                        <a href="https://yl3800.github.io/" target="_blank" rel="noopener noreferrer">Yicong Li</a><sup>1</sup>,
+                        <a href="https://www.comp.nus.edu.sg/~ayao/" target="_blank" rel="noopener noreferrer">Angela Yao</a><sup>1</sup>
                     </div>
                     <div class="affiliations">
                         <sup>1</sup>National University of Singapore, <sup>2</sup>Zhejiang University
