@@ -3,372 +3,1191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RelaxFlow is a training-free framework for text-driven amodal 3D generation that preserves visible evidence while steering unseen geometry with language.">
     <title>RelaxFlow: Text-Driven Amodal 3D Generation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css">
     <style>
         :root {
-            --primary-color: #1a202c; /* Deep slate */
-            --accent-color: #3182ce; /* Crisp blue */
-            --bg-color: #f7fafc; /* Off-white background */
-            --text-color: #4a5568; /* Soft dark grey for readable text */
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --code-bg: #0f172a;
-            --code-text: #e2e8f0;
-            --code-muted: #94a3b8;
+            --paper: #f6f0e6;
+            --paper-strong: #fbf7f0;
+            --surface: rgba(255, 252, 247, 0.78);
+            --surface-strong: rgba(255, 255, 255, 0.9);
+            --ink: #1f2b27;
+            --muted: #56645f;
+            --line: rgba(31, 43, 39, 0.12);
+            --line-strong: rgba(31, 43, 39, 0.18);
+            --accent: #2f6f62;
+            --accent-soft: rgba(47, 111, 98, 0.14);
+            --accent-warm: #b06a3d;
+            --shadow: 0 24px 60px rgba(32, 34, 27, 0.08);
+            --shadow-soft: 0 16px 30px rgba(32, 34, 27, 0.06);
+            --radius-xl: 32px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --page-width: 980px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.7;
             margin: 0;
-            padding: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(176, 106, 61, 0.16), transparent 34%),
+                radial-gradient(circle at top right, rgba(47, 111, 98, 0.14), transparent 28%),
+                linear-gradient(180deg, #f8f2e9 0%, #f5efe6 52%, #f8f3ec 100%);
+            font-family: "Newsreader", Georgia, serif;
+            line-height: 1.72;
             -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+            background-size: 36px 36px;
+            -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 72%);
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 72%);
+            opacity: 0.22;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .page {
+            position: relative;
+            overflow-x: hidden;
+            padding: 28px 20px 72px;
         }
 
         .container {
-            max-width: 900px;
+            width: min(100%, var(--page-width));
             margin: 0 auto;
-            padding: 60px 20px;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
+        .hero.container {
+            width: min(100%, 1040px);
+        }
+
+        .eyebrow,
+        .section-tag,
+        .chip,
+        .nav-link,
+        .link-btn,
+        .stat-label,
+        .metric-label,
+        .card-label,
+        .copy-btn,
+        .authors,
+        .affiliations,
+        .footer-note {
+            font-family: "Manrope", system-ui, sans-serif;
+        }
+
+        .hero {
+            position: relative;
+            padding-top: 18px;
+        }
+
+        .hero-panel {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.95fr);
+            gap: 24px;
+            padding: clamp(28px, 4vw, 48px);
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(253, 248, 241, 0.82) 100%);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            animation: rise 0.9s ease both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 18px;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 44px;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.5;
         }
 
         h1 {
-            font-size: 2.8rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-weight: 800;
+            margin: 0;
+            font-size: clamp(3.4rem, 8vw, 6rem);
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+            font-weight: 600;
+        }
+
+        .hero-subtitle {
+            margin: 14px 0 0;
+            font-size: clamp(1.3rem, 2.6vw, 2rem);
+            color: var(--accent);
             line-height: 1.2;
         }
 
+        .hero-summary {
+            max-width: 54rem;
+            margin: 24px 0 0;
+            font-size: 1.35rem;
+            color: var(--ink);
+        }
+
         .authors {
-            font-size: 1.25rem;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-            font-weight: 600;
+            margin-top: 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
         }
 
         .authors sup,
         .affiliations sup {
-            font-size: 0.7em;
+            font-size: 0.72em;
             vertical-align: super;
             line-height: 0;
-            margin-left: 1px;
         }
 
         .affiliations {
-            font-size: 1.1rem;
-            color: #718096;
-            margin-bottom: 25px;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 1rem;
         }
 
-        .links {
+        .hero-links {
             display: flex;
-            justify-content: center;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 12px;
+            margin-top: 28px;
         }
 
         .link-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 9999px; /* Pill shape */
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 12px 18px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid transparent;
+            transition: transform 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease;
         }
 
-        .link-btn i {
-            font-size: 1.05rem;
-            line-height: 1;
+        .link-btn.primary {
+            background: var(--ink);
+            color: #fffaf3;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .link-btn.secondary {
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--ink);
+            border-color: rgba(31, 43, 39, 0.1);
         }
 
         .link-btn:hover {
-            background-color: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
 
-        section {
-            background: var(--card-bg);
-            padding: 50px;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            margin-bottom: 40px;
+        .hero-side {
+            display: grid;
+            gap: 14px;
+            align-content: start;
         }
 
-        h2 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            border-bottom: 2px solid #edf2f7;
-            padding-bottom: 12px;
-            margin-top: 0;
-            margin-bottom: 25px;
+        .stat-card {
+            padding: 18px 18px 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            background: rgba(255, 255, 255, 0.76);
+            box-shadow: var(--shadow-soft);
         }
 
-        h3 {
-            color: var(--accent-color);
-            font-size: 1.4rem;
-            margin-top: 40px;
-            margin-bottom: 15px;
+        .stat-value {
+            font-size: 1.45rem;
+            line-height: 1.18;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+            font-weight: 600;
         }
 
-        p {
-            margin-bottom: 20px;
+        .stat-label {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
         }
 
-        .figure-container {
-            text-align: center;
-            margin: 40px 0;
-            padding: 24px;
-            background-color: #ffffff;
-            border-radius: 18px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        .stat-copy {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 1rem;
         }
 
-        .figure-container img {
+        .section-nav {
+            position: sticky;
+            top: 14px;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: fit-content;
             max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            background-color: #ffffff;
-            display: block;
-            margin: 0 auto;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            margin: 22px auto 0;
+            padding: 10px;
+            border-radius: 999px;
+            background: rgba(255, 252, 247, 0.78);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            box-shadow: 0 12px 28px rgba(31, 43, 39, 0.08);
+            backdrop-filter: blur(12px);
+            animation: rise 1s ease both;
+            animation-delay: 0.08s;
+        }
+
+        .nav-link {
+            padding: 9px 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--muted);
+            transition: background-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        main {
+            margin-top: 34px;
+        }
+
+        .story-section {
+            position: relative;
+            padding: clamp(56px, 8vw, 90px) 0;
+            animation: rise 0.9s ease both;
+        }
+
+        .story-section + .story-section {
+            border-top: 1px solid var(--line);
+        }
+
+        .section-head {
+            display: grid;
+            gap: 16px;
+            margin: 0 auto 30px;
+            max-width: 50rem;
+        }
+
+        .section-tag {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .section-head h2 {
+            margin: 0;
+            max-width: none;
+            font-size: clamp(2rem, 4.6vw, 3.15rem);
+            line-height: 1.06;
+            letter-spacing: -0.04em;
+            font-weight: 600;
+        }
+
+        .section-lead {
+            max-width: none;
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .figure-frame {
+            margin: 28px 0 0;
+            padding: clamp(16px, 2vw, 24px);
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(251, 247, 240, 0.96) 100%);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .figure-frame img {
+            width: 100%;
+            border-radius: 18px;
+            background: #ffffff;
         }
 
         .caption {
-            font-size: 0.95rem;
-            color: #718096;
-            margin-top: 18px;
-            line-height: 1.5;
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 0.98rem;
         }
 
-        ul {
-            padding-left: 20px;
-            margin-bottom: 20px;
+        .text-columns {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin: 28px auto 0;
+            max-width: 50rem;
         }
 
-        li {
-            margin-bottom: 12px;
+        .text-columns p,
+        .single-column p {
+            margin: 0;
+            font-size: 1.12rem;
+        }
+
+        .challenge-grid,
+        .task-grid,
+        .method-grid,
+        .benchmark-grid,
+        .metrics-grid,
+        .result-grid,
+        .gallery-grid {
+            display: grid;
+            gap: 16px;
+            margin-top: 28px;
+        }
+
+        .challenge-grid,
+        .task-grid,
+        .metrics-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .method-grid,
+        .result-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .benchmark-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gallery-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card,
+        .metric-card,
+        .result-card {
+            padding: 22px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            background: rgba(255, 255, 255, 0.76);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .card-label,
+        .metric-label {
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .card h3,
+        .metric-card h3,
+        .result-card h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        .card p,
+        .metric-card p,
+        .result-card p {
+            margin: 12px 0 0;
+            font-size: 1.03rem;
+            color: var(--muted);
+        }
+
+        .highlight-line {
+            margin-top: 22px;
+            padding: 18px 20px;
+            border-left: 3px solid var(--accent-warm);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            background: rgba(176, 106, 61, 0.08);
+            color: var(--ink);
+            font-size: 1.08rem;
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+            gap: 28px;
+            align-items: start;
+        }
+
+        .single-column {
+            display: grid;
+            gap: 18px;
+            max-width: 50rem;
+            margin: 0 auto;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .chip {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(47, 111, 98, 0.09);
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .subsection-note {
+            margin: 34px auto 0;
+            max-width: 50rem;
+        }
+
+        .subsection-note h3 {
+            margin: 0 0 10px;
+            font-size: 1.55rem;
+            line-height: 1.15;
+            font-weight: 600;
+        }
+
+        .subsection-note p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.02rem;
+        }
+
+        .gallery-grid .figure-frame {
+            margin: 0;
+            height: 100%;
+        }
+
+        .gallery-grid .figure-frame img {
+            width: 100%;
+        }
+
+        .gallery-wide {
+            grid-column: 1 / -1;
+        }
+
+        .sharp-figure img {
+            border-radius: 0;
+        }
+
+        .paired-gallery {
+            display: grid;
+            gap: 14px;
+        }
+
+        .paired-gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .paired-gallery-grid img {
+            width: 100%;
+            border-radius: 0;
+            background: #ffffff;
+        }
+
+        .theory-shell {
+            padding: clamp(26px, 4vw, 38px);
+            border-radius: var(--radius-xl);
+            background: linear-gradient(145deg, rgba(32, 48, 44, 0.96) 0%, rgba(50, 77, 70, 0.92) 100%);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            box-shadow: var(--shadow);
+            color: #f7f1e8;
+        }
+
+        .theory-shell .section-head {
+            margin-bottom: 22px;
+            max-width: 46rem;
+        }
+
+        .theory-shell .section-tag {
+            background: rgba(239, 210, 182, 0.14);
+            color: #f1d4bb;
+        }
+
+        .theory-shell h2 {
+            color: #fffaf2;
+        }
+
+        .theory-shell .section-lead,
+        .theory-shell p,
+        .theory-shell .caption {
+            color: rgba(247, 241, 232, 0.82);
+        }
+
+        .theory-shell .figure-frame {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: none;
+        }
+
+        .theory-shell .metric-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: none;
+        }
+
+        .theory-shell .metric-label {
+            color: #f1d4bb;
+        }
+
+        .theory-shell .metric-card h3 {
+            color: #fffaf2;
+        }
+
+        .theory-shell .metric-card p {
+            color: rgba(247, 241, 232, 0.78);
+        }
+
+        .result-card strong {
+            display: block;
+            font-size: 2rem;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            color: var(--accent);
+        }
+
+        .result-card span {
+            display: block;
+            margin-top: 10px;
+            font-family: "Manrope", system-ui, sans-serif;
+            font-size: 0.88rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
         }
 
         .citation-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-            border: 1px solid var(--border-color);
+            padding: clamp(24px, 4vw, 34px);
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(31, 43, 39, 0.08);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(246, 248, 245, 0.95) 100%);
+            box-shadow: var(--shadow);
         }
 
-        .citation-header {
+        .citation-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 18px;
+            align-items: flex-start;
+            gap: 18px;
         }
 
-        .citation-header p {
+        .citation-top p {
             margin: 0;
+            max-width: 44rem;
+            font-size: 1.12rem;
+            color: var(--muted);
         }
 
         .copy-btn {
-            border: 1px solid #bfdbfe;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border-radius: 9999px;
-            padding: 10px 18px;
+            border: 1px solid rgba(47, 111, 98, 0.18);
+            background: rgba(47, 111, 98, 0.08);
+            color: var(--accent);
+            border-radius: 999px;
+            padding: 11px 18px;
             font: inherit;
-            font-weight: 600;
+            font-size: 0.92rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
         }
 
         .copy-btn:hover {
-            background: #dbeafe;
             transform: translateY(-1px);
         }
 
         .copy-btn.copied {
-            background: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
+            background: rgba(72, 129, 88, 0.14);
+            border-color: rgba(72, 129, 88, 0.24);
+            color: #2e5f3a;
         }
 
         .bibtex-block {
-            margin: 0;
-            padding: 24px;
-            border-radius: 14px;
-            background: var(--code-bg);
-            color: var(--code-text);
+            margin: 22px 0 0;
+            padding: 22px;
+            border-radius: 20px;
             overflow-x: auto;
-            font-size: 0.95rem;
-            line-height: 1.75;
-            border: 1px solid #1e293b;
+            border: 1px solid rgba(31, 43, 39, 0.1);
+            background: #19211f;
+            color: #eef4ef;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         }
 
         .bibtex-block code {
-            font-family: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-            white-space: pre;
             display: block;
+            white-space: pre;
+            font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+            font-size: 0.93rem;
+            line-height: 1.7;
         }
 
         .copy-hint {
-            margin-top: 14px;
-            font-size: 0.92rem;
-            color: var(--code-muted);
+            margin-top: 12px;
+            min-height: 1.5em;
+            color: var(--muted);
+            font-size: 0.95rem;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.2rem; }
-            section { padding: 30px 20px; }
-            .citation-header {
+        .footer-note {
+            margin-top: 30px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 960px) {
+            .hero-panel,
+            .split-layout,
+            .text-columns,
+            .challenge-grid,
+            .task-grid,
+            .method-grid,
+            .benchmark-grid,
+            .metrics-grid,
+            .result-grid,
+            .gallery-grid,
+            .paired-gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-head h2 {
+                max-width: none;
+            }
+
+            .citation-top {
                 flex-direction: column;
-                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .page {
+                padding: 16px 16px 56px;
+            }
+
+            .hero-summary,
+            .section-lead {
+                font-size: 1.12rem;
+            }
+
+            .text-columns p,
+            .single-column p,
+            .card p,
+            .metric-card p,
+            .result-card p {
+                font-size: 1rem;
+            }
+
+            .section-nav {
+                top: 10px;
+                justify-content: flex-start;
+                width: 100%;
+                overflow-x: auto;
+                padding: 8px;
+            }
+
+            .nav-link {
+                flex: 0 0 auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
             }
         }
     </style>
 </head>
 <body>
+    <div class="page">
+        <header class="hero container">
+            <div class="hero-panel">
+                <div>
+                    <div class="eyebrow">ArXiv 2026 / Project Page</div>
+                    <h1>RelaxFlow</h1>
+                    <p class="hero-subtitle">Text-Driven Amodal 3D Generation</p>
+                    <p class="hero-summary">
+                        RelaxFlow is built around a simple claim: under heavy occlusion, single-view 3D generation is not merely incomplete, it is semantically underdetermined. What the model sees should be preserved rigidly; what language contributes should remain structural, relaxed, and focused on the unseen region.
+                    </p>
+                    <div class="authors">
+                        Jiayin Zhu<sup>1</sup>, Guoji Fu<sup>1</sup>, Xiaolu Liu<sup>2,1</sup>, Qiyuan He<sup>1</sup>, Yicong Li<sup>1</sup>, Angela Yao<sup>1</sup>
+                    </div>
+                    <div class="affiliations">
+                        <sup>1</sup>National University of Singapore, <sup>2</sup>Zhejiang University
+                    </div>
+                    <div class="hero-links">
+                        <a href="https://arxiv.org/abs/2603.05425" class="link-btn primary" target="_blank" rel="noopener noreferrer">
+                            <i class="ai ai-arxiv" aria-hidden="true"></i>
+                            <span>ArXiv</span>
+                        </a>
+                        <a href="https://github.com/viridityzhu/RelaxFlow" class="link-btn secondary" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-github" aria-hidden="true"></i>
+                            <span>Code</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-side">
+                    <article class="stat-card">
+                        <div class="stat-value">Ambiguity is the setting</div>
+                        <div class="stat-label">Problem framing</div>
+                        <p class="stat-copy">A partial observation may support several complete 3D explanations. The task is to resolve that ambiguity, not to pretend it does not exist.</p>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-value">Different conditions need different control</div>
+                        <div class="stat-label">Core insight</div>
+                        <p class="stat-copy">Observation should act as a hard constraint, while the prompt should behave like a relaxed guide for global hidden structure.</p>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-value">Inference-time restructuring</div>
+                        <div class="stat-label">Design choice</div>
+                        <p class="stat-copy">RelaxFlow realizes this idea by reorganizing guidance during sampling through dual branches, multi-prior consensus, low-pass relaxation, and visibility-aware fusion.</p>
+                    </article>
+                </div>
+            </div>
+        </header>
 
-<div class="container">
-    <header>
-        <h1>RelaxFlow: Text-Driven Amodal 3D Generation</h1>
-        <div class="authors">
-            Jiayin Zhu<sup>1</sup>, Guoji Fu<sup>1</sup>, Xiaolu Liu<sup>2,1</sup>, Qiyuan He<sup>1</sup>, Yicong Li<sup>1</sup>, Angela Yao<sup>1</sup>
-        </div>
-        <div class="affiliations">
-            <sup>1</sup>National University of Singapore, <sup>2</sup>Zhejiang University
-        </div>
-        <div class="links">
-            <a href="https://arxiv.org/abs/2603.05425" class="link-btn" target="_blank" rel="noopener noreferrer">
-                <i class="ai ai-arxiv" aria-hidden="true"></i>
-                <span>ArXiv</span>
-            </a>
-            <a href="https://github.com/viridityzhu/RelaxFlow" class="link-btn" target="_blank" rel="noopener noreferrer">
-                <i class="fa-brands fa-github" aria-hidden="true"></i>
-                <span>Code</span>
-            </a>
-        </div>
-    </header>
+        <nav class="section-nav" aria-label="Page Sections">
+            <a class="nav-link" href="#problem">Problem</a>
+            <a class="nav-link" href="#task">Task</a>
+            <a class="nav-link" href="#method">Method</a>
+            <a class="nav-link" href="#justification">Justification</a>
+            <a class="nav-link" href="#benchmarks">Benchmarks</a>
+            <a class="nav-link" href="#results">Results</a>
+            <a class="nav-link" href="#citation">Citation</a>
+        </nav>
 
-    <section id="what-we-do">
-        <h2>🎯 What We Do: Resolving Semantic Ambiguity</h2>
-        
-        <div class="figure-container">
-            <img src="assets/teaser.png" alt="Multiple plausible amodal 3D interpretations under occlusion">
-            <div class="caption">Figure 1: The case for multiple plausible amodal 3D interpretations under occlusion.</div>
-        </div>
+        <main class="container">
+            <section id="problem" class="story-section">
+                <div class="section-head">
+                    <div class="section-tag">Problem</div>
+                    <h2>Why single-view 3D becomes ambiguous under occlusion</h2>
+                    <p class="section-lead">
+                        When large parts of an object are hidden, the visible image may preserve local evidence but still fail to determine the full object category or geometry.
+                    </p>
+                </div>
 
-        <p>Image-to-3D generation faces inherent semantic ambiguity under occlusion, where partial observation alone is often insufficient to determine the object category. For instance, a visible wooden backboard could plausibly correspond to a sofa, a bed, or a dressing table. Existing feedforward models, like SAM3D, often collapse to an "observation-overfitted" shape by uncontrolled hallucination.</p>
-        
-        <p>We formalize <strong>text-driven amodal 3D generation</strong>. Our task allows users to explicitly steer the completion of unseen regions using text prompts, while strictly preserving the visual evidence of the input observation.</p>
-    </section>
+                <div class="figure-frame">
+                    <img src="assets/teaser.png" alt="Multiple plausible amodal 3D interpretations under occlusion">
+                    <p class="caption">
+                        A partially visible wooden backboard can plausibly belong to a sofa, a bed, or a dressing table. Standard feedforward models often collapse to one observation-overfitted guess, while RelaxFlow lets the user resolve that ambiguity with text.
+                    </p>
+                </div>
 
-    <section id="how-we-do-it">
-        <h2>⚙️ How We Do It: Decoupled Control & Relaxation</h2>
+                <div class="text-columns">
+                    <p>
+                        Humans routinely perform amodal perception: we infer complete objects even when large parts are hidden. Image-to-3D generation, however, usually relies on visible pixels alone. Under severe occlusion, that is simply not enough. A model may reconstruct the visible fragment faithfully and still commit to the wrong hidden object.
+                    </p>
+                    <p>
+                        RelaxFlow starts from that gap. Instead of forcing the system to make an uncontrolled guess, we treat the invisible region as something the user can explicitly disambiguate with language, while the visible evidence remains anchored to the input observation.
+                    </p>
+                    <p>
+                        This is why the problem is interesting. The challenge is not just “add text as another condition.” The observation and the prompt should not operate in the same way: one preserves what is already known, the other resolves what is still open.
+                    </p>
+                </div>
 
-        <p>These dual objectives demand distinct control granularities: rigid control for the visible observation versus relaxed structural control for the text prompt. To solve this, we propose <strong>RelaxFlow</strong>, a training-free dual-branch framework:</p>
+                <div class="challenge-grid">
+                    <article class="card">
+                        <div class="card-label">Challenge 01</div>
+                        <h3>Incomplete evidence</h3>
+                        <p>Heavy occlusion hides category-defining structure, so the visible pixels may support several plausible 3D explanations.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">Challenge 02</div>
+                        <h3>Multiple valid completions</h3>
+                        <p>The unseen region is not always a single right answer. Different prompts may all be reasonable given the same observed fragment.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">Challenge 03</div>
+                        <h3>Asymmetric control</h3>
+                        <p>The observation must be followed rigidly, but the prompt should guide global structure without overwriting visible details.</p>
+                    </article>
+                </div>
+            </section>
 
-        <ul>
-            <li><strong>Observation Branch:</strong> Provides strict adherence to ensure visual fidelity for the observed pixels.</li>
-            <li><strong>Multi-Prior Consensus:</strong> Converts the text prompt into visual proxy reference images. Cross-attention across these priors naturally amplifies structural consensus while suppressing inconsistent, instance-specific textures.</li>
-            <li><strong>Visibility-Aware Fusion:</strong> A spatial blending mechanism ensuring the semantic guide only steers genuinely occluded regions, while the observation strictly governs the visible pixels.</li>
-        </ul>
+            <section id="task" class="story-section">
+                <div class="section-head">
+                    <div class="section-tag">Task</div>
+                    <h2>Our task setting: text-driven amodal 3D generation</h2>
+                    <p class="section-lead">
+                        We pair a partial observation with a text prompt so the visible region stays anchored while the hidden region can be disambiguated explicitly.
+                    </p>
+                </div>
 
-        <div class="figure-container">
-            <img src="assets/fig-pipeline.png" alt="RelaxFlow pipeline overview">
-            <div class="caption">Figure 2: RelaxFlow pipeline overview, featuring the Observation Branch and Semantic-Prior Branch.</div>
-        </div>
+                <div class="task-grid">
+                    <article class="card">
+                        <div class="card-label">Input A</div>
+                        <h3>Observed image and mask</h3>
+                        <p>The visible part of the object acts as hard evidence. Its geometry and appearance should stay faithful to what is actually seen.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">Input B</div>
+                        <h3>Intent prompt</h3>
+                        <p>The text specifies how to complete the unseen region, such as deciding whether the hidden object should resolve into a sofa, bed, or desk.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">Output</div>
+                        <h3>A complete 3D asset</h3>
+                        <p>The result should remain evidence-consistent where the object is visible, and semantically aligned with user intent where the observation is ambiguous.</p>
+                    </article>
+                </div>
 
-        <h3>The Theory: Low-Pass Relaxation</h3>
-        
-        <div class="figure-container">
-            <img src="assets/fig-corridor-demon.png" alt="Conceptual illustration of low-pass relaxation">
-            <div class="caption">Figure 3: Conceptual illustration of low-pass relaxation widening the semantic corridor.</div>
-        </div>
+                <div class="highlight-line">
+                    RelaxFlow begins from one organizing idea: observation fidelity and prompt following are both necessary, but they should not be enforced at the same granularity.
+                </div>
+            </section>
 
-        <p>A core challenge is preventing the text prompt's high-frequency details from clashing with the input image. We introduce a Relaxation Mechanism that smooths cross-attention logits within the generation backbone.</p>
-        
-        <p>Theoretically, we prove this smoothing is equivalent to applying a low-pass filter on the generative vector field. This mathematically suppresses high-frequency instance details and exposes a coarse semantic corridor, enforcing only the low-frequency global geometry needed to accommodate the observation.</p>
-    </section>
+            <section id="method" class="story-section">
+                <div class="section-head">
+                    <div class="section-tag">Method</div>
+                    <h2>RelaxFlow separates observation fidelity from semantic guidance</h2>
+                    <p class="section-lead">
+                        The method keeps the observation branch rigid and makes the semantic branch deliberately relaxed, so the two conditions can cooperate during sampling.
+                    </p>
+                </div>
 
-    <section id="benchmarks-results">
-        <h2>📊 Benchmarks & Results</h2>
+                <div class="single-column">
+                    <p>
+                        Many existing pipelines effectively ask one conditioning mechanism to do two incompatible jobs at once. The observed image is supposed to preserve exact visible geometry and appearance, while the prompt is supposed to choose a plausible completion for the hidden region. When both are injected with the same kind of force, conflict is almost inevitable.
+                    </p>
+                    <p>
+                        RelaxFlow resolves this by evaluating two compatible trajectories on the same latent state. The observation branch remains strict and detail-preserving. The semantic branch is deliberately softened so that it can decide the global mode of the unseen object without overwriting the fine-grained evidence already provided by the observation.
+                    </p>
+                </div>
 
-        <p>To facilitate systematic evaluation, we introduce two new diagnostic benchmarks:</p>
-        <ul>
-            <li><strong>ExtremeOcc-3D:</strong> Targets extreme occlusion in natural indoor scenes where visible evidence cannot identify the object category.</li>
-            <li><strong>AmbiSem-3D:</strong> Targets semantic branching, where the same visual evidence admits multiple plausible interpretations, paired with distinct text prompts.</li>
-        </ul>
+                <div class="figure-frame">
+                    <img src="assets/fig-pipeline.png" alt="RelaxFlow pipeline overview">
+                    <p class="caption">
+                        Pipeline overview. RelaxFlow runs an observation branch and a semantic-prior branch in parallel, then fuses them over time and space to resolve occlusion-induced ambiguity.
+                    </p>
+                </div>
 
-        <div class="figure-container">
-            <img src="assets/fig-qual.png" alt="Qualitative Comparisons on AmbiSem-3D and ExtremeOcc-3D">
-            <div class="caption">Figure 4: Qualitative comparisons showcasing observation fidelity and prompt-controlled completion.</div>
-        </div>
+                <div class="method-grid">
+                    <article class="card">
+                        <div class="card-label">01</div>
+                        <h3>Observation branch</h3>
+                        <p>This branch stays rigid. It follows the observed image closely and preserves the high-frequency details that are already supported by direct visual evidence.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">02</div>
+                        <h3>Multi-prior consensus</h3>
+                        <p>Instead of forcing raw language into a visual-token backbone, RelaxFlow converts the prompt into several visual priors. What survives across those priors is the structural semantic agreement, not the incidental style of any single example.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">03</div>
+                        <h3>Low-pass relaxation</h3>
+                        <p>The semantic branch smooths cross-attention logits, suppressing high-frequency instance details so the prompt behaves like a geometric guide instead of an aggressive texture-level overwrite.</p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">04</div>
+                        <h3>Visibility-aware fusion</h3>
+                        <p>Prior guidance matters most when the global mode is still undecided. Later, and especially on clearly visible regions, the observation regains control so the final asset remains evidence-consistent.</p>
+                    </article>
+                </div>
 
-        <p>Extensive experiments demonstrate that RelaxFlow successfully steers the generation of unseen regions to match the prompt intent. It avoids the observation-overfitted collapse of existing models and produces high-quality 3D assets without compromising visual fidelity.</p>
-    </section>
+            </section>
 
-    <section id="citation" class="citation-card">
-        <div class="citation-header">
-            <p>If you find RelaxFlow useful in your research, please consider citing it:</p>
-            <button type="button" class="copy-btn" id="copy-citation-btn">Copy</button>
-        </div>
-        <pre class="bibtex-block"><code id="bibtex-content">@article{zhu2026relaxflow,
+            <section id="justification" class="story-section">
+                <div class="theory-shell">
+                    <div class="single-column">
+                        <div class="section-head">
+                            <div class="section-tag">Justification</div>
+                            <h2>Why low-pass relaxation helps</h2>
+                            <p class="section-lead">
+                                Our theoretical view is meant to justify the design choice: the semantic branch should guide broad structure, not impose instance-level detail.
+                            </p>
+                        </div>
+                        <p>
+                            A raw semantic prior is often too specific. If it carries instance-level appearance, texture, or viewpoint cues too strongly, it can clash with the observed image and push the sample away from the evidence we are trying to preserve. That is exactly the wrong behavior for amodal completion under ambiguity.
+                        </p>
+                        <p>
+                            RelaxFlow addresses this in two coordinated steps. First, multi-prior consensus already strips away some idiosyncratic detail by keeping what multiple prompt-derived priors agree on structurally. Then the relaxation mechanism smooths the prior-conditioned cross-attention logits, dampening the sharp token-local responses that would otherwise behave like a hidden texture override.
+                        </p>
+                        <p>
+                            In the paper, this is interpreted as a low-pass filter on the generative vector field. The effect is not to erase semantics, but to keep only the part of semantics that matters most here: the broad geometric tendency of the intended object class. The prompt no longer insists on a particular hidden instance; it opens a semantic corridor that is wide enough to accommodate the observed details, yet narrow enough to steer the sample toward the right family of completions.
+                        </p>
+                        <p>
+                            This perspective also explains the fusion schedule. Early in sampling, the corridor is most useful because the model is still deciding the global semantic mode. Later, once the broad structure has been selected, the observation branch should dominate again so local geometry and appearance remain anchored to the visible evidence.
+                        </p>
+
+                        <div class="figure-frame sharp-figure">
+                            <img src="assets/fig-corridor-demon.png" alt="Conceptual illustration of low-pass relaxation">
+                            <p class="caption">
+                                Low-pass relaxation widens the semantic corridor so the prompt can guide global hidden shape without behaving like a second rigid observation.
+                            </p>
+                        </div>
+
+                        <div class="metrics-grid">
+                            <article class="metric-card">
+                                <div class="metric-label">Observation</div>
+                                <h3>High-frequency, local, rigid</h3>
+                                <p>Visible pixels demand detail-preserving control because they correspond to direct evidence.</p>
+                            </article>
+                            <article class="metric-card">
+                                <div class="metric-label">Semantic prior</div>
+                                <h3>Low-frequency, global, relaxed</h3>
+                                <p>The prompt is most useful when it selects a plausible hidden structure rather than dictating a specific unseen instance.</p>
+                            </article>
+                            <article class="metric-card">
+                                <div class="metric-label">Fusion</div>
+                                <h3>Compatible dual guidance</h3>
+                                <p>Once the semantic branch is relaxed, the two conditions become complementary instead of adversarial during inference.</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="benchmarks" class="story-section">
+                <div class="section-head">
+                    <div class="section-tag">Benchmarks</div>
+                    <h2>Benchmarks for extreme occlusion and semantic branching</h2>
+                    <p class="section-lead">
+                        We evaluate the method on two settings: one where category identity is obscured by severe occlusion, and one where the same observation admits several plausible completions.
+                    </p>
+                </div>
+
+                <div class="benchmark-grid">
+                    <article class="card">
+                        <div class="card-label">ExtremeOcc-3D</div>
+                        <h3>264 severely occluded indoor objects</h3>
+                        <p>
+                            Built from 3D-FUTURE and 3D-FRONT, this benchmark focuses on cases with at least 80% occlusion. At that point, even the object category may be unclear from the visible fragment alone.
+                        </p>
+                    </article>
+                    <article class="card">
+                        <div class="card-label">AmbiSem-3D</div>
+                        <h3>21 semantically branching cases</h3>
+                        <p>
+                            Curated from ObjaverseXL, each input image admits multiple plausible prompt branches. The point is not a single ground truth, but whether the model can follow the intended branch while staying observation-consistent.
+                        </p>
+                    </article>
+                </div>
+
+            </section>
+
+            <section id="results" class="story-section">
+                <div class="section-head">
+                    <div class="section-tag">Results</div>
+                    <h2>Results on the two benchmarks</h2>
+                    <p class="section-lead">
+                        Across both settings, RelaxFlow improves prompt alignment while remaining faithful to the observed image.
+                    </p>
+                </div>
+
+                <div class="single-column">
+                    <p>
+                        On ExtremeOcc-3D, the effect of the method is easiest to describe conceptually: once the hidden region is allowed to be semantically steered, severe occlusion stops being a dead end. The model is no longer forced into one brittle guess from the visible fragment alone. Quantitatively, this shows up as better prompt alignment and stronger 3D semantic quality while keeping observed-view fidelity competitive.
+                    </p>
+                    <p>
+                        On AmbiSem-3D, the point is slightly different. The same observation can legitimately support several branches, so the question becomes whether a method can follow the intended branch without corrupting the observation. RelaxFlow performs well precisely because it treats prompt following as structured disambiguation rather than as free-form editing.
+                    </p>
+                </div>
+
+                <div class="result-grid">
+                    <article class="result-card">
+                        <div class="metric-label">ExtremeOcc-3D / SAM3D</div>
+                        <h3>Severe occlusion becomes meaningfully steerable</h3>
+                        <p>On the SAM3D backbone, CLIP-text rises from 24.08 to 27.26, while Point-FID improves from 100.38 to 81.11, indicating better semantic control without abandoning visible evidence.</p>
+                    </article>
+                    <article class="result-card">
+                        <div class="metric-label">AmbiSem-3D</div>
+                        <h3>Different prompts lead to genuinely different branches</h3>
+                        <p>On the semantic-branching benchmark, RelaxFlow reaches 0.87 CLIP-image, 27.23 CLIP-text, and 68.52% overall user preference across 32 volunteers.</p>
+                    </article>
+                    <article class="result-card">
+                        <div class="metric-label">Across backbones</div>
+                        <h3>The idea is not tied to a single generator</h3>
+                        <p>The same inference logic also improves TRELLIS, reducing Point-FID on ExtremeOcc-3D from 141.48 to 97.79 and showing that the insight survives beyond one backbone.</p>
+                    </article>
+                    <article class="result-card">
+                        <div class="metric-label">Qualitative pattern</div>
+                        <h3>The failure modes shift in the right direction</h3>
+                        <p>Compared with baselines, RelaxFlow is less likely to ignore the prompt, collapse into one observation-overfitted guess, or introduce prompt-driven artifacts that break the visible evidence.</p>
+                    </article>
+                </div>
+
+                <div class="figure-frame sharp-figure">
+                    <img src="assets/fig-qual.png" alt="Qualitative comparisons on AmbiSem-3D and ExtremeOcc-3D">
+                    <p class="caption">
+                        Qualitative comparisons. Under the same partial observation, RelaxFlow can follow different prompts to produce different yet evidence-consistent 3D completions. Baselines often either ignore the prompt or drift away from the observation.
+                    </p>
+                </div>
+
+                <div class="text-columns">
+                    <p>
+                        The qualitative story lines up with the quantitative one. Under heavy occlusion, standard feedforward models often stay trapped in an observation-overfitted mode: they protect visible fragments, but fail to escape the wrong semantic guess. Multi-view or edit-then-reconstruct pipelines can inject prompt information, yet often do so by creating inconsistency or geometry artifacts.
+                    </p>
+                </div>
+
+                <div class="subsection-note">
+                    <h3>More qualitative examples</h3>
+                    <p>
+                        We also include the additional qualitative figures from the appendix below. They cover both semantic branching cases and extreme occlusion cases, and make the same pattern visible across a broader set of examples.
+                    </p>
+                </div>
+
+                <div class="gallery-grid" aria-label="Additional qualitative examples">
+                    <div class="figure-frame gallery-wide sharp-figure paired-gallery">
+                        <div class="paired-gallery-grid">
+                            <img src="docs/ICML_2026_RelaxFlow/figures/appen-fig-more-qual-backboard.png" alt="Semantic branching examples with a backboard observation">
+                            <img src="docs/ICML_2026_RelaxFlow/figures/appen-fig-more-qual-shield.png" alt="Semantic branching examples with shield-like ambiguity">
+                        </div>
+                        <p class="caption">
+                            Additional AmbiSem-3D examples. Across ambiguous observations, RelaxFlow follows the chosen prompt while preserving the visible evidence.
+                        </p>
+                    </div>
+                    <div class="figure-frame gallery-wide sharp-figure">
+                        <img src="docs/ICML_2026_RelaxFlow/figures/fig-qual-occ-sam3d.png" alt="Additional extreme occlusion examples with SAM3D backbone">
+                        <p class="caption">
+                            Additional ExtremeOcc-3D examples on the SAM3D backbone.
+                        </p>
+                    </div>
+                    <div class="figure-frame sharp-figure">
+                        <img src="docs/ICML_2026_RelaxFlow/figures/appen-fig-more-qual-3.png" alt="Additional prompt-conditioned completions from AmbiSem-3D">
+                        <p class="caption">
+                            Additional AmbiSem-3D examples.
+                        </p>
+                    </div>
+                    <div class="figure-frame sharp-figure">
+                        <img src="docs/ICML_2026_RelaxFlow/figures/fig-qual-occ-trellis.png" alt="Additional extreme occlusion examples with TRELLIS backbone">
+                        <p class="caption">
+                            Additional ExtremeOcc-3D examples on TRELLIS.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="single-column">
+                    <p>
+                        Taken together, these examples highlight the same point as the quantitative results: RelaxFlow preserves the observed structure where the evidence is reliable, while allowing semantic guidance to act where the image alone is no longer sufficient. This is the sense in which the method is best understood as a way to handle ambiguity more cleanly, rather than simply as a stronger generator.
+                    </p>
+                </div>
+            </section>
+
+            <section id="citation" class="story-section">
+                <div class="citation-card">
+                    <div class="citation-top">
+                        <div>
+                            <div class="section-tag">Citation</div>
+                            <p>If RelaxFlow helps your research, please consider citing the paper.</p>
+                        </div>
+                        <button type="button" class="copy-btn" id="copy-citation-btn">Copy BibTeX</button>
+                    </div>
+                    <pre class="bibtex-block"><code id="bibtex-content">@article{zhu2026relaxflow,
   title={RelaxFlow: Text-Driven Amodal 3D Generation},
   author={Zhu, Jiayin and Fu, Guoji and Liu, Xiaolu and He, Qiyuan and Li, Yicong and Yao, Angela},
   journal={arXiv preprint arXiv:2603.05425},
   year={2026}
 }</code></pre>
-        <p class="copy-hint" id="copy-feedback"></p>
-    </section>
-</div>
+                    <div class="copy-hint" id="copy-feedback" aria-live="polite"></div>
+                </div>
+                <div class="footer-note">Project page for RelaxFlow. Code and paper links are provided above.</div>
+            </section>
+        </main>
+    </div>
 
-<script>
-    const copyButton = document.getElementById('copy-citation-btn');
-    const bibtexContent = document.getElementById('bibtex-content');
-    const copyFeedback = document.getElementById('copy-feedback');
+    <script>
+        const copyButton = document.getElementById("copy-citation-btn");
+        const bibtexContent = document.getElementById("bibtex-content");
+        const copyFeedback = document.getElementById("copy-feedback");
 
-    if (copyButton && bibtexContent && copyFeedback) {
-        copyButton.addEventListener('click', async () => {
-            const citationText = bibtexContent.textContent;
+        if (copyButton && bibtexContent && copyFeedback) {
+            copyButton.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(bibtexContent.textContent);
+                    copyButton.textContent = "Copied";
+                    copyButton.classList.add("copied");
+                    copyFeedback.textContent = "BibTeX copied to clipboard.";
+                } catch (error) {
+                    copyButton.textContent = "Unavailable";
+                    copyFeedback.textContent = "Clipboard access is unavailable in this browser.";
+                }
 
-            try {
-                await navigator.clipboard.writeText(citationText);
-                copyButton.textContent = 'Copied';
-                copyButton.classList.add('copied');
-                copyFeedback.textContent = 'BibTeX copied to clipboard.';
-            } catch (error) {
-                copyButton.textContent = 'Unavailable';
-                copyFeedback.textContent = '';
-            }
-
-            window.clearTimeout(copyButton._resetTimer);
-            copyButton._resetTimer = window.setTimeout(() => {
-                copyButton.textContent = 'Copy';
-                copyButton.classList.remove('copied');
-                copyFeedback.textContent = '';
-            }, 2200);
-        });
-    }
-</script>
-
+                window.clearTimeout(copyButton._resetTimer);
+                copyButton._resetTimer = window.setTimeout(() => {
+                    copyButton.textContent = "Copy BibTeX";
+                    copyButton.classList.remove("copied");
+                    copyFeedback.textContent = "";
+                }, 2200);
+            });
+        }
+    </script>
 </body>
 </html>
